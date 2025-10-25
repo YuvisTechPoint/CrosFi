@@ -25,6 +25,7 @@ export function Header() {
 
   const navItems = [
     { label: "Dashboard", href: "/dashboard" },
+    { label: "Vault", href: "/vault" },
     { label: "Markets", href: "/markets" },
     { label: "Lend", href: "/lend" },
     { label: "Positions", href: "/positions" },

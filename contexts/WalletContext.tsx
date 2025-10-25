@@ -12,6 +12,8 @@ interface WalletContextType {
   connect: () => Promise<void>
   disconnect: () => void
   provider: ethers.BrowserProvider | null
+  signer: ethers.JsonRpcSigner | null
+  switchToCeloNetwork: () => Promise<void>
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined)
@@ -20,12 +22,26 @@ interface WalletProviderProps {
   children: ReactNode
 }
 
+// Celo Alfajores network configuration
+const CELO_ALFAJORES = {
+  chainId: '0xaef3', // 44787 in hex
+  chainName: 'Celo Alfajores Testnet',
+  nativeCurrency: {
+    name: 'Celo',
+    symbol: 'CELO',
+    decimals: 18,
+  },
+  rpcUrls: ['https://alfajores-forno.celo-testnet.org'],
+  blockExplorerUrls: ['https://alfajores.celoscan.io'],
+}
+
 export function WalletProvider({ children }: WalletProviderProps) {
   const [address, setAddress] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null)
+  const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null)
 
   // Check if already connected on mount
   useEffect(() => {
@@ -46,9 +62,13 @@ export function WalletProvider({ children }: WalletProviderProps) {
             setAddress(null)
             setIsConnected(false)
             setProvider(null)
+            setSigner(null)
           } else if (accounts[0] !== address) {
             // User switched accounts
             setAddress(accounts[0])
+            if (provider) {
+              setSigner(await provider.getSigner())
+            }
           }
         }
       } catch (err) {
@@ -57,7 +77,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }, 1000) // Check every second
 
     return () => clearInterval(pollInterval)
-  }, [isConnected, address])
+  }, [isConnected, address, provider])
 
   const checkConnection = async () => {
     try {
@@ -67,11 +87,28 @@ export function WalletProvider({ children }: WalletProviderProps) {
         if (accounts.length > 0) {
           setAddress(accounts[0])
           setIsConnected(true)
-          setProvider(new ethers.BrowserProvider(ethereumProvider as any))
+          const browserProvider = new ethers.BrowserProvider(ethereumProvider as any)
+          setProvider(browserProvider)
+          setSigner(await browserProvider.getSigner())
         }
       }
     } catch (err) {
       console.error('Error checking connection:', err)
+    }
+  }
+
+  const switchToCeloNetwork = async () => {
+    try {
+      const ethereumProvider = await detectEthereumProvider()
+      if (ethereumProvider && 'request' in ethereumProvider) {
+        await (ethereumProvider as any).request({
+          method: 'wallet_addEthereumChain',
+          params: [CELO_ALFAJORES],
+        })
+      }
+    } catch (err: any) {
+      console.error('Error switching to Celo network:', err)
+      throw new Error('Failed to switch to Celo network')
     }
   }
 
@@ -94,7 +131,15 @@ export function WalletProvider({ children }: WalletProviderProps) {
       if (accounts.length > 0) {
         setAddress(accounts[0])
         setIsConnected(true)
-        setProvider(new ethers.BrowserProvider(ethereumProvider as any))
+        const browserProvider = new ethers.BrowserProvider(ethereumProvider as any)
+        setProvider(browserProvider)
+        setSigner(await browserProvider.getSigner())
+        
+        // Check if we're on the correct network
+        const network = await browserProvider.getNetwork()
+        if (network.chainId !== BigInt(44787)) {
+          await switchToCeloNetwork()
+        }
       }
 
     } catch (err: any) {
@@ -105,11 +150,11 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }
 
-
   const disconnect = () => {
     setAddress(null)
     setIsConnected(false)
     setProvider(null)
+    setSigner(null)
     setError(null)
   }
 
@@ -120,7 +165,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
     error,
     connect,
     disconnect,
-    provider
+    provider,
+    signer,
+    switchToCeloNetwork
   }
 
   return (

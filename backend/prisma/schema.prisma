@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(uuid())
+  address     String        @unique
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  transactions Transaction[]
+  positions   Position[]
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // DEPOSIT, WITHDRAW
+  token       String
+  amount      String
+  shares      String?
+  txHash      String   @unique
+  blockNumber BigInt?
+  timestamp   DateTime @default(now())
+  status      String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  gasUsed     String?
+  gasPrice    String?
+}
+
+model Position {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token       String
+  shares      String
+  assetValue  String
+  apy         Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, token])
+}
+
+model APYHistory {
+  id        String   @id @default(uuid())
+  token     String
+  apy       Float
+  tvl       String
+  timestamp DateTime @default(now())
+
+  @@index([token, timestamp])
+}
+
+model VaultStats {
+  id            String   @id @default(uuid())
+  token         String   @unique
+  totalAssets   String
+  totalShares   String
+  totalUsers    Int
+  apy           Float
+  lastUpdated   DateTime @default(now())
+
+  @@index([token])
+}
+
+model DailyVolume {
+  id        String   @id @default(uuid())
+  date      DateTime @db.Date
+  token     String
+  volume    String
+  deposits  String
+  withdrawals String
+  createdAt DateTime @default(now())
+
+  @@unique([date, token])
+  @@index([date])
+}

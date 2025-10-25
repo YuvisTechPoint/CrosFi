@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 export function CTASection() {
   return (
@@ -48,6 +49,26 @@ export function CTASection() {
           <Button size="lg" variant="outline" className="cursor-pointer">
             View Markets
           </Button>
+        </motion.div>
+
+        {/* Vault CTA */}
+        <motion.div
+          className="mt-12 pt-8 border-t border-primary/20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+        >
+          <h3 className="text-2xl font-bold mb-2">🌱 Earn 8% APY with CeloYield Vault</h3>
+          <p className="text-foreground/60 mb-6">
+            Maximize your yields on Celo stablecoins with automated optimization
+          </p>
+          <Link href="/vault">
+            <Button size="lg" variant="outline" className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100">
+              Launch Vault
+              <ArrowRight size={18} className="ml-2" />
+            </Button>
+          </Link>
         </motion.div>
       </motion.div>
     </section>

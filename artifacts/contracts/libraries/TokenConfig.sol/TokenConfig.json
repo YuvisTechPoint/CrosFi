@@ -1,0 +1,50 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "TokenConfig",
+  "sourceName": "contracts/libraries/TokenConfig.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "CELO_ADDRESS",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "CUSD_ADDRESS",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "USDC_ADDRESS",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x60d9610039600b82828239805160001a60731461002c57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe730000000000000000000000000000000000000000301460806040526004361060475760003560e01c80632a4b914214604c578063465c66e914606f578063bb09d9b7146089575b600080fd5b6053600081565b6040516001600160a01b03909116815260200160405180910390f35b605373874069fa1eb16d44d622f2e0ca25eea172369bc181565b6053732f25deb3848c207fc8e0c34035b3ba7fc157602b8156fea264697066735822122045bf8d7a22e9aaaa1b47726e2f9ffa247bf4448551008591463c894df080763364736f6c63430008130033",
+  "deployedBytecode": "0x730000000000000000000000000000000000000000301460806040526004361060475760003560e01c80632a4b914214604c578063465c66e914606f578063bb09d9b7146089575b600080fd5b6053600081565b6040516001600160a01b03909116815260200160405180910390f35b605373874069fa1eb16d44d622f2e0ca25eea172369bc181565b6053732f25deb3848c207fc8e0c34035b3ba7fc157602b8156fea264697066735822122045bf8d7a22e9aaaa1b47726e2f9ffa247bf4448551008591463c894df080763364736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
