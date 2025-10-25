@@ -12,14 +12,13 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TrendingUp, TrendingDown, RefreshCw, BarChart3 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useApiClient } from "@/lib/api-client"
+import { apiClient } from "@/lib/api-client"
 
 export default function Rates() {
   const [timeframe, setTimeframe] = useState<"24h" | "7d" | "30d">("24h")
   const [sortBy, setSortBy] = useState<"apy" | "tvl" | "users">("apy")
   const [vaultTokens, setVaultTokens] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const apiClient = useApiClient()
 
   useEffect(() => {
     const fetchVaultTokens = async () => {

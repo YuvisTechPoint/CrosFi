@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowRight, TrendingUp, TrendingDown, Filter, Search } from "lucide-react"
 import { InfoTooltip } from "@/components/ui/info-tooltip"
 import { cn } from "@/lib/utils"
-import { useApiClient } from "@/lib/api-client"
+import { apiClient } from "@/lib/api-client"
 
 export default function Markets() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -20,7 +20,6 @@ export default function Markets() {
   const [filterToken, setFilterToken] = useState<string>("all")
   const [vaultTokens, setVaultTokens] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const apiClient = useApiClient()
 
   useEffect(() => {
     const fetchVaultTokens = async () => {

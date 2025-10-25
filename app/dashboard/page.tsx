@@ -10,12 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Plus, TrendingUp, TrendingDown, DollarSign } from "lucide-react"
 import { InfoTooltip } from "@/components/ui/info-tooltip"
 import { useWallet } from "@/contexts/WalletContext"
-import { useApiClient } from "@/lib/api-client"
+import { apiClient } from "@/lib/api-client"
 import { useEffect, useState } from "react"
 
 export default function Dashboard() {
   const { address, isConnected } = useWallet()
-  const apiClient = useApiClient()
   const [positions, setPositions] = useState<any[]>([])
   const [userStats, setUserStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)

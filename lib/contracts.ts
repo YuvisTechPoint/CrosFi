@@ -37,25 +37,28 @@ export interface UserStats {
 }
 
 export class ContractService {
-  private provider: ethers.BrowserProvider
-  private signer: ethers.JsonRpcSigner
+  private provider: ethers.BrowserProvider | ethers.JsonRpcProvider
+  private signer: ethers.JsonRpcSigner | null
 
-  constructor(provider: ethers.BrowserProvider, signer: ethers.JsonRpcSigner) {
+  constructor(provider: ethers.BrowserProvider | ethers.JsonRpcProvider, signer: ethers.JsonRpcSigner | null) {
     this.provider = provider
     this.signer = signer
   }
 
   // Get contract instances
   get vaultContract() {
-    return new ethers.Contract(addresses.vault, MultiTokenVaultABI, this.signer)
+    if (!this.signer) throw new Error('No signer available')
+    return new ethers.Contract(addresses.contracts.vault, MultiTokenVaultABI, this.signer)
   }
 
   get strategyContract() {
-    return new ethers.Contract(addresses.strategy, MentoYieldStrategyABI, this.signer)
+    if (!this.signer) throw new Error('No signer available')
+    return new ethers.Contract(addresses.contracts.strategy, MentoYieldStrategyABI, this.signer)
   }
 
   // Get token contract instance
   getTokenContract(tokenAddress: string) {
+    if (!this.signer) throw new Error('No signer available')
     return new ethers.Contract(tokenAddress, ERC20_ABI, this.signer)
   }
 
@@ -119,25 +122,34 @@ export class ContractService {
 
     const amountWei = ethers.parseUnits(amount, tokenInfo.decimals)
     const tokenContract = this.getTokenContract(tokenAddress)
-    const tx = await tokenContract.approve(addresses.vault, amountWei)
+    const tx = await tokenContract.approve(addresses.contracts.vault, amountWei)
     return await tx.wait()
   }
 
   // Read functions
   async getVaultStats(tokenAddress: string): Promise<VaultStats> {
-    const [totalAssets, totalShares, apy] = await Promise.all([
-      this.vaultContract.totalAssets(tokenAddress),
-      this.vaultContract.totalShares(tokenAddress),
-      this.vaultContract.getAPY(tokenAddress)
-    ])
+    try {
+      const [totalAssets, totalShares, apy] = await Promise.all([
+        this.vaultContract.totalAssets(tokenAddress),
+        this.vaultContract.totalShares(tokenAddress),
+        this.vaultContract.getAPY(tokenAddress)
+      ])
 
-    const tokenInfo = this.getSupportedTokens().find(t => t.address === tokenAddress)
-    const decimals = tokenInfo?.decimals || 18
+      const tokenInfo = this.getSupportedTokens().find(t => t.address === tokenAddress)
+      const decimals = tokenInfo?.decimals || 18
 
-    return {
-      totalAssets: ethers.formatUnits(totalAssets, decimals),
-      totalShares: ethers.formatEther(totalShares),
-      apy: Number(apy) / 100 // Convert basis points to percentage
+      return {
+        totalAssets: ethers.formatUnits(totalAssets, decimals),
+        totalShares: ethers.formatEther(totalShares),
+        apy: Number(apy) / 100 // Convert basis points to percentage
+      }
+    } catch (error: any) {
+      console.warn(`Failed to get vault stats for token ${tokenAddress}:`, error.message)
+      return {
+        totalAssets: '0',
+        totalShares: '0',
+        apy: 0
+      }
     }
   }
 
@@ -162,16 +174,25 @@ export class ContractService {
   }
 
   async getUserStats(userAddress: string, tokenAddress: string): Promise<UserStats> {
-    const [userShares, userAssetBalance, assetBalance] = await Promise.all([
-      this.vaultContract.userTokenSharesBalance(userAddress, tokenAddress),
-      this.vaultContract.userAssetBalance(userAddress, tokenAddress),
-      this.getTokenBalance(userAddress, tokenAddress)
-    ])
+    try {
+      const [userShares, userAssetBalance, assetBalance] = await Promise.all([
+        this.vaultContract.userTokenSharesBalance(userAddress, tokenAddress),
+        this.vaultContract.userAssetBalance(userAddress, tokenAddress),
+        this.getTokenBalance(userAddress, tokenAddress)
+      ])
 
-    return {
-      userShares: ethers.formatEther(userShares),
-      userAssetBalance: ethers.formatUnits(userAssetBalance, this.getTokenDecimals(tokenAddress)),
-      assetBalance: assetBalance
+      return {
+        userShares: ethers.formatEther(userShares),
+        userAssetBalance: ethers.formatUnits(userAssetBalance, this.getTokenDecimals(tokenAddress)),
+        assetBalance: assetBalance
+      }
+    } catch (error: any) {
+      console.warn(`Failed to get user stats for token ${tokenAddress}:`, error.message)
+      return {
+        userShares: '0',
+        userAssetBalance: '0',
+        assetBalance: '0'
+      }
     }
   }
 
@@ -206,9 +227,15 @@ export class ContractService {
       return ethers.formatEther(balance)
     } else {
       // Get ERC20 token balance
-      const tokenContract = this.getTokenContract(tokenAddress)
-      const balance = await tokenContract.balanceOf(userAddress)
-      return ethers.formatUnits(balance, tokenInfo.decimals)
+      try {
+        const tokenContract = this.getTokenContract(tokenAddress)
+        const balance = await tokenContract.balanceOf(userAddress)
+        return ethers.formatUnits(balance, tokenInfo.decimals)
+      } catch (error: any) {
+        // Handle case where contract doesn't exist or call fails
+        console.warn(`Failed to get balance for token ${tokenInfo.symbol} at ${tokenAddress}:`, error.message)
+        return '0' // Return 0 balance if contract call fails
+      }
     }
   }
 
@@ -217,9 +244,15 @@ export class ContractService {
     if (!tokenInfo) throw new Error('Unsupported token')
     if (tokenInfo.isNative) return '0' // Native tokens don't need approval
 
-    const tokenContract = this.getTokenContract(tokenAddress)
-    const allowance = await tokenContract.allowance(userAddress, addresses.vault)
-    return ethers.formatUnits(allowance, tokenInfo.decimals)
+    try {
+      const tokenContract = this.getTokenContract(tokenAddress)
+      const allowance = await tokenContract.allowance(userAddress, addresses.contracts.vault)
+      return ethers.formatUnits(allowance, tokenInfo.decimals)
+    } catch (error: any) {
+      // Handle case where contract doesn't exist or call fails
+      console.warn(`Failed to get allowance for token ${tokenInfo.symbol} at ${tokenAddress}:`, error.message)
+      return '0' // Return 0 allowance if contract call fails
+    }
   }
 
   // Utility functions
@@ -230,7 +263,7 @@ export class ContractService {
 
   // Strategy functions
   async getStrategyStats(tokenAddress: string) {
-    const [deposits, withdrawals, yield, tvl] = await this.strategyContract.getStrategyStats(tokenAddress)
+    const [deposits, withdrawals, yieldAmount, tvl] = await this.strategyContract.getStrategyStats(tokenAddress)
     
     const tokenInfo = this.getSupportedTokens().find(t => t.address === tokenAddress)
     const decimals = tokenInfo?.decimals || 18
@@ -238,7 +271,7 @@ export class ContractService {
     return {
       deposits: ethers.formatUnits(deposits, decimals),
       withdrawals: ethers.formatUnits(withdrawals, decimals),
-      yield: ethers.formatUnits(yield, decimals),
+      yield: ethers.formatUnits(yieldAmount, decimals),
       tvl: ethers.formatUnits(tvl, decimals)
     }
   }
@@ -250,7 +283,7 @@ export class ContractService {
 }
 
 // Helper function to create contract service
-export function createContractService(provider: ethers.BrowserProvider, signer: ethers.JsonRpcSigner) {
+export function createContractService(provider: ethers.BrowserProvider | ethers.JsonRpcProvider, signer: ethers.JsonRpcSigner | null) {
   return new ContractService(provider, signer)
 }
 

@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'
 
-const apiClient = axios.create({
+const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
@@ -11,7 +11,7 @@ const apiClient = axios.create({
 })
 
 // Request interceptor for logging
-apiClient.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config) => {
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`)
     return config
@@ -23,7 +23,7 @@ apiClient.interceptors.request.use(
 )
 
 // Response interceptor for error handling
-apiClient.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   (response) => {
     return response
   },
@@ -110,50 +110,50 @@ export interface VaultToken {
 export class APIClient {
   // Analytics endpoints
   async getTVL(): Promise<TVLData> {
-    const response = await apiClient.get('/api/analytics/tvl')
+    const response = await axiosInstance.get('/api/analytics/tvl')
     return response.data
   }
 
   async getAPY(token: string): Promise<APYData> {
-    const response = await apiClient.get(`/api/analytics/apy/${token}`)
+    const response = await axiosInstance.get(`/api/analytics/apy/${token}`)
     return response.data
   }
 
   async getAPYHistory(token: string, days: number = 30): Promise<APYHistoryData[]> {
-    const response = await apiClient.get(`/api/analytics/apy-history/${token}?days=${days}`)
+    const response = await axiosInstance.get(`/api/analytics/apy-history/${token}?days=${days}`)
     return response.data
   }
 
   // User endpoints
   async getUserPositions(address: string): Promise<UserPosition[]> {
-    const response = await apiClient.get(`/api/user/${address}/positions`)
+    const response = await axiosInstance.get(`/api/user/${address}/positions`)
     return response.data
   }
 
   async getUserTransactions(address: string, limit: number = 50, offset: number = 0): Promise<Transaction[]> {
-    const response = await apiClient.get(`/api/user/${address}/transactions?limit=${limit}&offset=${offset}`)
+    const response = await axiosInstance.get(`/api/user/${address}/transactions?limit=${limit}&offset=${offset}`)
     return response.data
   }
 
   async getUserStats(address: string): Promise<UserStats> {
-    const response = await apiClient.get(`/api/user/${address}/stats`)
+    const response = await axiosInstance.get(`/api/user/${address}/stats`)
     return response.data
   }
 
   // Vault endpoints
   async getVaultStats(): Promise<VaultStats> {
-    const response = await apiClient.get('/api/vault/stats')
+    const response = await axiosInstance.get('/api/vault/stats')
     return response.data
   }
 
   async getVaultTokens(): Promise<VaultToken[]> {
-    const response = await apiClient.get('/api/vault/tokens')
+    const response = await axiosInstance.get('/api/vault/tokens')
     return response.data
   }
 
   // Health check
   async getHealth(): Promise<{ status: string; timestamp: string; version: string }> {
-    const response = await apiClient.get('/health')
+    const response = await axiosInstance.get('/health')
     return response.data
   }
 
@@ -210,6 +210,11 @@ export class APIClient {
 
 // Create singleton instance
 export const apiClient = new APIClient()
+
+// React hook for using the API client
+export function useApiClient() {
+  return apiClient
+}
 
 // Export default instance
 export default apiClient

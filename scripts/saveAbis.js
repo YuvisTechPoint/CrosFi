@@ -15,7 +15,12 @@ if (!fs.existsSync(outputDir)) {
 // Contract names to extract ABIs for
 const contracts = [
   'MultiTokenVault',
-  'MentoYieldStrategy'
+  'MentoYieldStrategy',
+  'LendingPool',
+  'InterestModel',
+  'OracleAdapter',
+  'DebtToken',
+  'CollateralManager'
 ];
 
 console.log('📄 Extracting contract ABIs...');
@@ -29,6 +34,16 @@ contracts.forEach(contractName => {
       contractPath = path.join(artifactsDir, 'vault', contractName + '.sol', contractName + '.json');
     } else if (contractName === 'MentoYieldStrategy') {
       contractPath = path.join(artifactsDir, 'strategies', contractName + '.sol', contractName + '.json');
+    } else if (contractName === 'LendingPool') {
+      contractPath = path.join(artifactsDir, 'lending', contractName + '.sol', contractName + '.json');
+    } else if (contractName === 'InterestModel') {
+      contractPath = path.join(artifactsDir, contractName + '.sol', contractName + '.json');
+    } else if (contractName === 'OracleAdapter') {
+      contractPath = path.join(artifactsDir, 'oracles', contractName + '.sol', contractName + '.json');
+    } else if (contractName === 'DebtToken') {
+      contractPath = path.join(artifactsDir, 'lending', contractName + '.sol', contractName + '.json');
+    } else if (contractName === 'CollateralManager') {
+      contractPath = path.join(artifactsDir, 'lending', contractName + '.sol', contractName + '.json');
     } else {
       // Fallback to original path structure
       contractPath = path.join(artifactsDir, contractName + '.sol', contractName + '.json');

@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@chainlink/contracts": "^1.4.0",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.10.0",
     "@metamask/detect-provider": "^2.0.0",
