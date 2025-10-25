@@ -1,0 +1,41 @@
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import { ThemeProvider } from "@/components/theme-provider"
+import { WalletProvider } from "@/contexts/WalletContext"
+import { BottomNav } from "@/components/mobile/BottomNav"
+import "./globals.css"
+
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "Cross-Currency Lending Protocol - Celo",
+  description: "Borrow in any currency, collateralize with another. Access cUSD, cEUR, cREAL, and eXOF liquidity using multi-currency collateral on Celo.",
+  generator: "v0.app",
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} font-sans antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <WalletProvider>
+            {children}
+            <BottomNav />
+          </WalletProvider>
+        </ThemeProvider>
+        <Analytics />
+      </body>
+    </html>
+  )
+}
