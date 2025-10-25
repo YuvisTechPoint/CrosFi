@@ -1,7 +1,7 @@
 "use client"
 
 import { Currency } from "@/lib/types"
-import { getCurrencyInfo } from "@/lib/mock-data"
+import { getCurrencyInfo } from "@/lib/currency-config"
 import { cn } from "@/lib/utils"
 
 interface CurrencyBadgeProps {

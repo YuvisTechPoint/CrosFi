@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Currency } from "@/lib/types"
-import { CURRENCIES, MOCK_BALANCES } from "@/lib/mock-data"
+import { CURRENCIES } from "@/lib/currency-config"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Check } from "lucide-react"
@@ -21,7 +21,7 @@ interface MobileCurrencySheetProps {
 export function MobileCurrencySheet({
   selectedCurrency,
   onCurrencySelect,
-  availableCurrencies = ['cUSD', 'cEUR', 'cREAL', 'eXOF'],
+  availableCurrencies = Object.keys(CURRENCIES) as Currency[],
   title = "Select Currency",
   trigger,
   open,
@@ -32,8 +32,8 @@ export function MobileCurrencySheet({
   const setIsOpen = onOpenChange || setInternalOpen
 
   const getBalance = (currency: Currency) => {
-    const balance = MOCK_BALANCES.find(b => b.currency === currency)
-    return balance?.balance || 0
+    // In a real implementation, this would fetch from wallet or API
+    return 0
   }
 
   const handleCurrencySelect = (currency: Currency) => {

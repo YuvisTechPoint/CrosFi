@@ -1,8 +1,5 @@
 import { WebSocketServer, WebSocket } from 'ws'
 import { Server } from 'http'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
 
 interface WebSocketMessage {
   type: string

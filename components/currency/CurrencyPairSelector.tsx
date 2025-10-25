@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Currency } from "@/lib/types"
-import { CURRENCIES, getCurrencyPair } from "@/lib/mock-data"
+import { CURRENCIES, getCurrencyPair } from "@/lib/currency-config"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowRight, ChevronDown, Check } from "lucide-react"
@@ -32,7 +32,7 @@ export function CurrencyPairSelector({
   const [collateralOpen, setCollateralOpen] = useState(false)
   const [borrowOpen, setBorrowOpen] = useState(false)
 
-  const availableCurrencies: Currency[] = ['cUSD', 'cEUR', 'cREAL', 'eXOF']
+  const availableCurrencies: Currency[] = Object.keys(CURRENCIES) as Currency[]
   
   const getAvailableBorrowCurrencies = () => {
     if (!collateralCurrency) return availableCurrencies

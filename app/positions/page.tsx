@@ -3,15 +3,42 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { PositionList } from "@/components/position/PositionList"
-import { MOCK_POSITIONS } from "@/lib/mock-data"
+import { useWallet } from "@/contexts/WalletContext"
+import { useApiClient } from "@/lib/api-client"
+import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Filter, Download, Eye } from "lucide-react"
 
 export default function Positions() {
+  const { address, isConnected } = useWallet()
+  const apiClient = useApiClient()
+  const [positions, setPositions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchPositions = async () => {
+      if (!isConnected || !address) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const positionsData = await apiClient.getUserPositions(address)
+        setPositions(positionsData)
+      } catch (error) {
+        console.error('Error fetching positions:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPositions()
+  }, [isConnected, address, apiClient])
+
   const handleCreateNew = () => {
-    window.location.href = '/lend'
+    window.location.href = '/vault'
   }
 
   const handleRepay = (position: any) => {
@@ -34,12 +61,10 @@ export default function Positions() {
     // Open position details modal
   }
 
-  const activePositions = MOCK_POSITIONS.filter(p => p.status === 'active')
-  const totalCollateralValue = activePositions.reduce((sum, pos) => sum + pos.collateralAmount, 0)
-  const totalBorrowedValue = activePositions.reduce((sum, pos) => sum + pos.borrowedAmount, 0)
-  const averageHealthFactor = activePositions.length > 0 
-    ? activePositions.reduce((sum, pos) => sum + pos.healthFactor, 0) / activePositions.length
-    : 0
+  const activePositions = positions.filter(p => p.status === 'active')
+  const totalCollateralValue = activePositions.reduce((sum, pos) => sum + parseFloat(pos.asset_value || '0'), 0)
+  const totalBorrowedValue = 0 // Vault positions don't have borrowed amounts
+  const averageHealthFactor = 100 // Vault positions are always healthy
 
   return (
     <main className="min-h-screen bg-background">
@@ -180,7 +205,8 @@ export default function Positions() {
 
           {/* Positions List */}
           <PositionList
-            positions={MOCK_POSITIONS}
+            positions={positions}
+            loading={loading}
             onRepay={handleRepay}
             onAddCollateral={handleAddCollateral}
             onClose={handleClose}

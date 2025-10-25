@@ -1,12 +1,13 @@
+// Load environment variables first
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { createServer } from 'http';
 import WebSocketService from './websocket';
 import { db } from './services/database';
-
-// Load environment variables
-dotenv.config();
+import { conversionRateService } from './services/conversionRates';
 
 const app = express();
 const server = createServer(app);
@@ -207,6 +208,89 @@ app.get('/ws/status', (req, res) => {
       subscribedUsers: stats.subscribedUsers
     }
   });
+});
+
+// Conversion rates endpoints
+app.get('/api/rates', async (req, res) => {
+  try {
+    const rates = conversionRateService.getAllRates();
+    res.json({
+      success: true,
+      data: rates,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching conversion rates:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch conversion rates'
+    });
+  }
+});
+
+app.get('/api/rates/:from/:to', async (req, res) => {
+  try {
+    const { from, to } = req.params;
+    const rate = conversionRateService.getConversionRate(from.toUpperCase(), to.toUpperCase());
+    
+    if (!rate) {
+      return res.status(404).json({
+        success: false,
+        error: 'Conversion rate not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: rate
+    });
+  } catch (error) {
+    console.error('Error fetching conversion rate:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch conversion rate'
+    });
+  }
+});
+
+app.get('/api/balances/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+    const balances = await conversionRateService.getTokenBalances(address);
+    const totalValue = await conversionRateService.getPortfolioValue(address);
+    
+    res.json({
+      success: true,
+      data: {
+        address,
+        balances,
+        totalValueUSD: totalValue,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching token balances:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch token balances'
+    });
+  }
+});
+
+app.post('/api/rates/update', async (req, res) => {
+  try {
+    await conversionRateService.updateRates();
+    res.json({
+      success: true,
+      message: 'Conversion rates updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating conversion rates:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update conversion rates'
+    });
+  }
 });
 
 // Start server

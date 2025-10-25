@@ -6,7 +6,13 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
-    "db:setup": "echo 'Supabase database setup - see DEPLOYMENT_GUIDE.md'",
+    "db:setup": "node scripts/setup-database.js",
+    "db:init": "node scripts/db-migrate.js init",
+    "db:status": "node scripts/db-migrate.js status",
+    "db:backup": "node scripts/db-migrate.js backup",
+    "db:restore": "node scripts/db-migrate.js restore",
+    "db:health": "node scripts/db-health-check.js",
+    "db:dashboard": "node scripts/db-dashboard.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -24,6 +30,8 @@
     "ws": "^8.0.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.4",
     "@types/node": "^24.9.1",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
