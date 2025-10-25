@@ -17,12 +17,12 @@ export default function Rates() {
   const [timeframe, setTimeframe] = useState<"24h" | "7d" | "30d">("24h")
   const [sortBy, setSortBy] = useState<"rate" | "change" | "volume">("change")
 
-  const sortedRates = [...EXCHANGE_RATES].sort((a, b) => {
+  const sortedRates = [...(EXCHANGE_RATES || [])].sort((a, b) => {
     switch (sortBy) {
       case "rate":
-        return b.rate - a.rate
+        return (b.rate || 0) - (a.rate || 0)
       case "change":
-        return Math.abs(b.change24h) - Math.abs(a.change24h)
+        return Math.abs(b.change24h || 0) - Math.abs(a.change24h || 0)
       case "volume":
         const aVolume = MOCK_VOLUME_DATA.find(v => v.pair === `${a.from}-${a.to}`)?.volume24h || 0
         const bVolume = MOCK_VOLUME_DATA.find(v => v.pair === `${b.from}-${b.to}`)?.volume24h || 0
@@ -32,7 +32,8 @@ export default function Rates() {
     }
   })
 
-  const formatVolume = (volume: number) => {
+  const formatVolume = (volume: number | undefined) => {
+    if (!volume || isNaN(volume)) return '$0'
     if (volume >= 1000000) {
       return `$${(volume / 1000000).toFixed(1)}M`
     } else if (volume >= 1000) {
@@ -42,7 +43,7 @@ export default function Rates() {
   }
 
   const getVolumeForPair = (from: string, to: string) => {
-    const volumeData = MOCK_VOLUME_DATA.find(v => v.pair === `${from}-${to}`)
+    const volumeData = (MOCK_VOLUME_DATA || []).find(v => v.pair === `${from}-${to}`)
     return volumeData?.volume24h || 0
   }
 
@@ -117,17 +118,19 @@ export default function Rates() {
               const fromInfo = CURRENCIES[rate.from]
               const toInfo = CURRENCIES[rate.to]
               const volume = getVolumeForPair(rate.from, rate.to)
-              const isPositive = rate.change24h >= 0
+              const isPositive = (rate.change24h || 0) >= 0
+              
+              if (!fromInfo || !toInfo) return null
               
               return (
                 <ExchangeRateCard
                   key={index}
                   fromCurrency={rate.from}
                   toCurrency={rate.to}
-                  rate={rate.rate}
-                  change24h={rate.change24h}
+                  rate={rate.rate || 0}
+                  change24h={rate.change24h || 0}
                   source="Mento"
-                  lastUpdated={rate.lastUpdated}
+                  lastUpdated={rate.lastUpdated || Date.now()}
                   showChart={true}
                   onClick={() => {
                     // Open detailed chart view
@@ -142,10 +145,14 @@ export default function Rates() {
           <Card className="p-6 mb-8">
             <h3 className="text-lg font-semibold mb-6">Trading Volume (24h)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {MOCK_VOLUME_DATA.map((volumeData, index) => {
+              {(MOCK_VOLUME_DATA || []).map((volumeData, index) => {
+                if (!volumeData || !volumeData.pair) return null
+                
                 const [from, to] = volumeData.pair.split('-')
                 const fromInfo = CURRENCIES[from as keyof typeof CURRENCIES]
                 const toInfo = CURRENCIES[to as keyof typeof CURRENCIES]
+                
+                if (!fromInfo || !toInfo) return null
                 
                 return (
                   <div key={index} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
@@ -167,7 +174,7 @@ export default function Rates() {
                       <span className="font-medium">{toInfo.symbol}</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">{formatVolume(volumeData.volume24h)}</div>
+                      <div className="font-semibold">{formatVolume(volumeData.volume24h || 0)}</div>
                       <div className="text-xs text-muted-foreground">24h volume</div>
                     </div>
                   </div>
@@ -182,11 +189,13 @@ export default function Rates() {
               <h3 className="text-lg font-semibold mb-4">Top Gainers (24h)</h3>
               <div className="space-y-3">
                 {sortedRates
-                  .filter(rate => rate.change24h > 0)
+                  .filter(rate => (rate.change24h || 0) > 0)
                   .slice(0, 3)
                   .map((rate, index) => {
                     const fromInfo = CURRENCIES[rate.from]
                     const toInfo = CURRENCIES[rate.to]
+                    
+                    if (!fromInfo || !toInfo) return null
                     
                     return (
                       <div key={index} className="flex items-center justify-between">
@@ -201,7 +210,7 @@ export default function Rates() {
                         </div>
                         <div className="flex items-center gap-2 text-green-600">
                           <TrendingUp className="w-4 h-4" />
-                          <span className="font-medium">+{rate.change24h.toFixed(2)}%</span>
+                          <span className="font-medium">+{(rate.change24h || 0).toFixed(2)}%</span>
                         </div>
                       </div>
                     )
@@ -213,11 +222,13 @@ export default function Rates() {
               <h3 className="text-lg font-semibold mb-4">Top Losers (24h)</h3>
               <div className="space-y-3">
                 {sortedRates
-                  .filter(rate => rate.change24h < 0)
+                  .filter(rate => (rate.change24h || 0) < 0)
                   .slice(0, 3)
                   .map((rate, index) => {
                     const fromInfo = CURRENCIES[rate.from]
                     const toInfo = CURRENCIES[rate.to]
+                    
+                    if (!fromInfo || !toInfo) return null
                     
                     return (
                       <div key={index} className="flex items-center justify-between">
@@ -232,7 +243,7 @@ export default function Rates() {
                         </div>
                         <div className="flex items-center gap-2 text-red-600">
                           <TrendingDown className="w-4 h-4" />
-                          <span className="font-medium">{rate.change24h.toFixed(2)}%</span>
+                          <span className="font-medium">{(rate.change24h || 0).toFixed(2)}%</span>
                         </div>
                       </div>
                     )

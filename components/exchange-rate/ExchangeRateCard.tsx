@@ -29,7 +29,7 @@ export function ExchangeRateCard({
   className = '',
   onClick
 }: ExchangeRateCardProps) {
-  const exchangeRate = rate || getExchangeRate(fromCurrency, toCurrency)
+  const exchangeRate = rate ? { rate, change24h: change24h || 0, lastUpdated: lastUpdated || Date.now() } : getExchangeRate(fromCurrency, toCurrency)
   
   if (!exchangeRate) {
     return (
@@ -41,8 +41,17 @@ export function ExchangeRateCard({
 
   const fromInfo = CURRENCIES[fromCurrency]
   const toInfo = CURRENCIES[toCurrency]
-  const isPositive = exchangeRate.change24h >= 0
-  const changePercent = change24h || exchangeRate.change24h
+  
+  if (!fromInfo || !toInfo) {
+    return (
+      <Card className={cn("p-4 text-muted-foreground", className)}>
+        Currency info not available
+      </Card>
+    )
+  }
+  
+  const isPositive = (exchangeRate.change24h || 0) >= 0
+  const changePercent = change24h || exchangeRate.change24h || 0
 
   const formatTimeAgo = (timestamp: number) => {
     const now = Date.now()
@@ -101,7 +110,7 @@ export function ExchangeRateCard({
 
       {/* Rate Value */}
       <div className="text-2xl font-mono font-bold mb-2">
-        {exchangeRate.rate.toFixed(4)}
+        {(exchangeRate.rate || 0).toFixed(4)}
       </div>
 
       {/* Source and Last Updated */}
