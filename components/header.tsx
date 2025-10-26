@@ -36,11 +36,11 @@ export function Header() {
     <header className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white text-sm font-bold">
+        <Link href="/" className="flex items-center gap-2 text-xl text-primary" style={{ fontFamily: 'var(--font-orbitron)' }}>
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white text-sm" style={{ fontFamily: 'var(--font-orbitron)' }}>
             CR
           </div>
-          lCelo
+          <span style={{ fontFamily: 'var(--font-orbitron)' }}>lCelo</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -49,7 +49,8 @@ export function Header() {
             <Link
               key={item.label}
               href={item.href}
-              className="text-foreground hover:text-primary transition-colors text-sm font-medium"
+              className="text-foreground hover:text-primary transition-colors text-sm nav-link"
+              style={{ fontFamily: 'var(--font-orbitron)' }}
             >
               {item.label}
             </Link>

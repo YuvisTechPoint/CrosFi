@@ -56,9 +56,9 @@ export default function Markets() {
     })
 
   const getUtilizationColor = (utilization: number) => {
-    if (utilization >= 80) return "text-red-600 bg-red-50"
-    if (utilization >= 60) return "text-yellow-600 bg-yellow-50"
-    return "text-green-600 bg-green-50"
+    if (utilization >= 80) return "text-foreground bg-muted"
+    if (utilization >= 60) return "text-foreground bg-secondary"
+    return "text-foreground bg-accent"
   }
 
   const formatCurrency = (amount: number) => {
@@ -102,8 +102,8 @@ export default function Markets() {
 
             <Card className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <TrendingDown className="w-5 h-5 text-blue-600" />
+                <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                  <TrendingDown className="w-5 h-5 text-secondary-foreground" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-foreground">
@@ -116,8 +116,8 @@ export default function Markets() {
 
             <Card className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-green-600" />
+                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-accent-foreground" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-foreground">
@@ -130,8 +130,8 @@ export default function Markets() {
 
             <Card className="p-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-purple-600" />
+                <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-foreground">

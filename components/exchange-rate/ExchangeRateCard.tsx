@@ -97,7 +97,7 @@ export function ExchangeRateCard({
         
         <div className={cn(
           "flex items-center gap-1 text-sm font-medium",
-          isPositive ? "text-green-600" : "text-red-600"
+          isPositive ? "text-foreground" : "text-muted-foreground"
         )}>
           {isPositive ? (
             <TrendingUp className="w-4 h-4" />
@@ -109,7 +109,7 @@ export function ExchangeRateCard({
       </div>
 
       {/* Rate Value */}
-      <div className="text-2xl font-mono font-bold mb-2">
+      <div className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-orbitron)' }}>
         {(exchangeRate.rate || 0).toFixed(4)}
       </div>
 

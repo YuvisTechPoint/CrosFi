@@ -1,39 +1,51 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { BarChart3, Lock, Zap, Eye, Users, Shield } from "lucide-react"
+import { Shield, Zap, Globe, Smartphone, Lock, TrendingUp } from "lucide-react"
 
 export function FeaturesSection() {
   const features = [
     {
-      icon: BarChart3,
-      title: "Multi-Currency Support",
-      description: "Access cUSD, cEUR, cREAL, and eXOF liquidity with any currency as collateral.",
-    },
-    {
-      icon: Lock,
-      title: "Mento Oracle Integration",
-      description: "Real-time exchange rates via decentralized Mento Protocol oracles.",
+      icon: Shield,
+      title: "Secure Cross-Currency Lending",
+      description: "Borrow in any currency while using another as collateral. Our smart contracts ensure secure, transparent transactions across all Celo stablecoins.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
       icon: Zap,
-      title: "Instant Cross-Currency Loans",
-      description: "Borrow in any currency instantly using different currency collateral.",
+      title: "Algorithmic Interest Rates",
+      description: "Dynamic interest rates that adjust automatically based on supply and demand, ensuring competitive rates for both lenders and borrowers.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
-      icon: Eye,
-      title: "Transparent Risk Management",
-      description: "Real-time health factors and liquidation thresholds for all positions.",
+      icon: Globe,
+      title: "Global Accessibility",
+      description: "Access cross-currency lending from anywhere in the world. No traditional banking barriers or geographic restrictions.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
-      icon: Users,
-      title: "Global Liquidity Access",
-      description: "Access liquidity pools across all supported Celo stablecoins.",
+      icon: Smartphone,
+      title: "Mobile-First Design",
+      description: "Built for mobile users with intuitive interfaces. Access DeFi lending directly from your smartphone with ease.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
-      icon: Shield,
-      title: "Smart Contract Security",
-      description: "Audited contracts with multi-sig governance. Your funds are protected.",
+      icon: Lock,
+      title: "Automated Risk Management",
+      description: "Advanced liquidation protection and risk management systems ensure the safety of your funds across all currency pairs.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+    {
+      icon: TrendingUp,
+      title: "Yield Optimization",
+      description: "Maximize your returns with auto-compounding features and yield farming opportunities across multiple currency pairs.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
   ]
 
@@ -48,19 +60,16 @@ export function FeaturesSection() {
   }
 
   const itemVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
-      scale: 1,
-      transition: { duration: 0.5 },
+      y: 0,
+      transition: { duration: 0.6 },
     },
   }
 
   return (
-    <section
-      id="features"
-      className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background via-primary/5 to-background"
-    >
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <motion.div
@@ -70,15 +79,17 @@ export function FeaturesSection() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-balance">Cross-Currency Features</h2>
-          <p className="text-lg text-foreground/60 max-w-2xl mx-auto">
-            Everything you need for secure, transparent, and efficient cross-currency lending.
+          <h2 className="text-4xl sm:text-5xl font-display mb-4 text-balance">
+            Powerful Features for <span className="text-gradient-purple">Cross-Currency Lending</span>
+          </h2>
+          <p className="text-lg text-foreground/60 max-w-2xl mx-auto font-heading">
+            Experience the future of decentralized finance with our innovative cross-currency lending protocol.
           </p>
         </motion.div>
 
         {/* Features Grid */}
         <motion.div
-          className="grid md:grid-cols-3 gap-8"
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -90,72 +101,32 @@ export function FeaturesSection() {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="p-6 rounded-xl border border-border bg-card/50 backdrop-blur hover:border-primary/50 hover:bg-card transition-all duration-300 group"
+                className="p-6 rounded-xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300 group"
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <Icon size={24} className="text-primary" />
+                <div className={`w-12 h-12 ${feature.bgColor} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <Icon size={24} className={feature.color} />
                 </div>
-                <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
-                <p className="text-foreground/60">{feature.description}</p>
+                <h3 className="text-lg font-heading mb-2">{feature.title}</h3>
+                <p className="text-foreground/60 leading-relaxed font-heading">{feature.description}</p>
               </motion.div>
             )
           })}
         </motion.div>
 
-        {/* Comparison Table */}
+        {/* Additional Info */}
         <motion.div
-          className="mt-20 overflow-x-auto"
+          className="mt-16 text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-4 px-4 font-bold">Feature</th>
-                <th className="text-center py-4 px-4 font-bold">celorate</th>
-                <th className="text-center py-4 px-4 font-bold">Traditional Banks</th>
-                <th className="text-center py-4 px-4 font-bold">Other DeFi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { feature: "Cross-Currency Lending", celorate: true, banks: false, defi: false },
-                { feature: "Multi-Currency Collateral", celorate: true, banks: false, defi: false },
-                { feature: "Real-time Exchange Rates", celorate: true, banks: false, defi: false },
-                { feature: "24/7 Access", celorate: true, banks: false, defi: true },
-                { feature: "No Intermediaries", celorate: true, banks: false, defi: true },
-                { feature: "Instant Settlement", celorate: true, banks: false, defi: true },
-                { feature: "Transparent Fees", celorate: true, banks: false, defi: true },
-              ].map((row, index) => (
-                <tr key={index} className="border-b border-border/50 hover:bg-primary/5 transition-colors">
-                  <td className="py-4 px-4 font-medium">{row.feature}</td>
-                  <td className="text-center py-4 px-4">
-                    {row.celorate ? (
-                      <span className="text-primary font-bold">✓</span>
-                    ) : (
-                      <span className="text-foreground/30">✗</span>
-                    )}
-                  </td>
-                  <td className="text-center py-4 px-4">
-                    {row.banks ? (
-                      <span className="text-foreground/50">✓</span>
-                    ) : (
-                      <span className="text-foreground/30">✗</span>
-                    )}
-                  </td>
-                  <td className="text-center py-4 px-4">
-                    {row.defi ? (
-                      <span className="text-foreground/50">✓</span>
-                    ) : (
-                      <span className="text-foreground/30">✗</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 border border-primary/20 rounded-full">
+            <Zap size={20} className="text-primary" />
+            <span className="text-sm font-heading text-primary">
+              Built on Celo's Carbon-Negative Blockchain
+            </span>
+          </div>
         </motion.div>
       </div>
     </section>

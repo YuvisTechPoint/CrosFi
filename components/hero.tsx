@@ -30,8 +30,9 @@ export function Hero() {
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
 
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden">
+
+      {/* Original floating particles (kept for additional depth) */}
+      <div className="absolute inset-0 overflow-hidden z-1">
         <motion.div
           className="absolute w-96 h-96 bg-primary/10 rounded-full blur-3xl"
           animate={{ y: [0, 50, 0], x: [0, 30, 0] }}
@@ -57,14 +58,14 @@ export function Hero() {
         <motion.div variants={itemVariants} className="mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full">
             <Zap size={16} className="text-primary" />
-            <span className="text-sm font-medium text-primary">Cross-Currency Lending Protocol</span>
+            <span className="text-sm text-primary badge-text" style={{ fontFamily: 'var(--font-orbitron)' }}>Cross-Currency Lending Protocol</span>
           </div>
         </motion.div>
 
         {/* Main Heading */}
-        <motion.h1 variants={itemVariants} className="text-5xl sm:text-6xl lg:text-7xl font-bold text-balance mb-6">
+        <motion.h1 variants={itemVariants} className="text-5xl sm:text-6xl lg:text-7xl font-display text-balance hero-heading">
           Cross-Currency{" "}
-          <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <span className="celo-style" data-text="Lending on Celo">
             Lending on Celo
           </span>
         </motion.h1>
@@ -72,7 +73,7 @@ export function Hero() {
         {/* Subheading */}
         <motion.p
           variants={itemVariants}
-          className="text-lg sm:text-xl text-foreground/70 text-balance mb-8 max-w-2xl mx-auto"
+          className="text-lg sm:text-xl text-foreground/70 text-balance mb-8 max-w-2xl mx-auto font-heading"
         >
           Borrow in any currency, collateralize with another. Access cUSD, cEUR, cREAL, and eXOF liquidity using multi-currency collateral. Mobile-first. Low fees. Global access.
         </motion.p>

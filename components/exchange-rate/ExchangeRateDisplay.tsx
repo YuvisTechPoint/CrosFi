@@ -28,7 +28,7 @@ export function ExchangeRateDisplay({
   size = 'md',
   className = ''
 }: ExchangeRateDisplayProps) {
-  const exchangeRate = rate || getExchangeRate(fromCurrency, toCurrency)
+  const exchangeRate = rate ? { rate, change24h: change24h || 0, lastUpdated: lastUpdated || Date.now() } : getExchangeRate(fromCurrency, toCurrency)
   
   if (!exchangeRate) {
     return (
@@ -90,7 +90,7 @@ export function ExchangeRateDisplay({
       </div>
 
       {/* Rate Value */}
-      <div className={cn("font-mono font-semibold", sizeClasses[size])}>
+      <div className={cn("font-semibold", sizeClasses[size])} style={{ fontFamily: 'var(--font-orbitron)' }}>
         1 {fromInfo.symbol} = {exchangeRate.rate.toFixed(4)} {toInfo.symbol}
       </div>
 
@@ -98,7 +98,7 @@ export function ExchangeRateDisplay({
       <div className="flex items-center gap-2">
         <div className={cn(
           "flex items-center gap-1 text-sm font-medium",
-          isPositive ? "text-green-600" : "text-red-600"
+          isPositive ? "text-foreground" : "text-muted-foreground"
         )}>
           {isPositive ? (
             <TrendingUp className="w-4 h-4" />

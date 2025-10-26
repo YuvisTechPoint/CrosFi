@@ -17,7 +17,7 @@ export const CURRENCIES: Record<Currency, CurrencyInfo> = {
     symbol: 'cUSD',
     name: 'Celo Dollar',
     flag: '🇺🇸',
-    color: '#4285F4',
+    color: '#808080', // Medium gray
     decimals: 18,
     address: '0x765DE816845861e75A25fCA122bb6898B8B1282a'
   },
@@ -25,7 +25,7 @@ export const CURRENCIES: Record<Currency, CurrencyInfo> = {
     symbol: 'cEUR',
     name: 'Celo Euro',
     flag: '🇪🇺',
-    color: '#7B61FF',
+    color: '#A0A0A0', // Light gray
     decimals: 18,
     address: '0xD8763CBa276a3738E6DE85b4b3bF5FDed6D6cA73'
   },
@@ -33,7 +33,7 @@ export const CURRENCIES: Record<Currency, CurrencyInfo> = {
     symbol: 'cREAL',
     name: 'Celo Real',
     flag: '🇧🇷',
-    color: '#00C853',
+    color: '#606060', // Dark gray
     decimals: 18,
     address: '0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787'
   },
@@ -41,7 +41,7 @@ export const CURRENCIES: Record<Currency, CurrencyInfo> = {
     symbol: 'eXOF',
     name: 'eXOF',
     flag: '🇸🇳',
-    color: '#FF9800',
+    color: '#C0C0C0', // Light gray
     decimals: 18,
     address: '0xE919F65739c26a42616b7b8eedC6b5524d1e3aC4'
   }

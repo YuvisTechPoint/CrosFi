@@ -96,7 +96,7 @@ export function ApiContent() {
         >
           <h2 className="text-xl font-bold mb-4 text-primary">Base URL</h2>
           <div className="flex items-center gap-3">
-            <code className="flex-1 p-3 bg-background rounded-lg border text-sm font-mono">
+            <code className="flex-1 p-3 bg-background rounded-lg border text-sm" style={{ fontFamily: 'var(--font-orbitron)' }}>
               https://api.celorate.com
             </code>
             <Button
@@ -132,19 +132,19 @@ export function ApiContent() {
                   <div className="flex items-center gap-3">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                       endpoint.method === 'GET' 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                        ? 'bg-secondary text-secondary-foreground'
+                        : 'bg-accent text-accent-foreground'
                     }`}>
                       {endpoint.method}
                     </span>
-                    <code className="text-sm font-mono bg-muted px-2 py-1 rounded">
+                    <code className="text-sm bg-muted px-2 py-1 rounded" style={{ fontFamily: 'var(--font-orbitron)' }}>
                       {endpoint.path}
                     </code>
                   </div>
                 </div>
                 <p className="text-foreground/70 mb-4">{endpoint.description}</p>
                 <div className="flex items-center gap-3">
-                  <code className="flex-1 p-3 bg-muted rounded-lg text-sm font-mono text-xs overflow-x-auto">
+                  <code className="flex-1 p-3 bg-muted rounded-lg text-sm text-xs overflow-x-auto" style={{ fontFamily: 'var(--font-orbitron)' }}>
                     {endpoint.example}
                   </code>
                   <Button

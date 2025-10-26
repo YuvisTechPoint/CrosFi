@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useWallet } from '@/contexts/WalletContext'
 import { createContractService, TokenInfo } from '@/lib/contracts'
-import { apiClient, TVLData, VaultStats as APIVaultStats } from '@/lib/api-client'
+import apiClient, { TVLData, VaultStats as APIVaultStats } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { TrendingUp, DollarSign, Users, Coins } from 'lucide-react'
@@ -112,8 +112,8 @@ export function VaultStats() {
 
   if (error) {
     return (
-      <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-red-600">Error: {error}</p>
+      <div className="mb-8 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+        <p className="text-destructive">Error: {error}</p>
       </div>
     )
   }
@@ -169,13 +169,13 @@ export function VaultStats() {
         {/* Total Value Locked */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
+            <CardTitle className="text-sm text-gray-600 flex items-center gap-2" style={{ fontFamily: 'var(--font-orbitron)' }}>
+              <DollarSign className="h-4 w-4 text-primary" />
               Total Value Locked
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl" style={{ fontFamily: 'var(--font-orbitron)' }}>
               ${getTotalTVL()}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -187,17 +187,17 @@ export function VaultStats() {
         {/* Average APY */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
+            <CardTitle className="text-sm text-gray-600 flex items-center gap-2" style={{ fontFamily: 'var(--font-orbitron)' }}>
+              <TrendingUp className="h-4 w-4 text-primary" />
               Average APY
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl" style={{ fontFamily: 'var(--font-orbitron)' }}>
                 {getAverageAPY()}%
               </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
                 {backendAvailable ? 'Live' : 'Blockchain'}
               </Badge>
             </div>
@@ -207,13 +207,13 @@ export function VaultStats() {
         {/* Your Total Balance */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Coins className="h-4 w-4" />
+            <CardTitle className="text-sm text-gray-600 flex items-center gap-2" style={{ fontFamily: 'var(--font-orbitron)' }}>
+              <Coins className="h-4 w-4 text-primary" />
               Your Balance
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl" style={{ fontFamily: 'var(--font-orbitron)' }}>
               ${getUserTotalBalance()}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -225,13 +225,13 @@ export function VaultStats() {
         {/* Your Total Shares */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Users className="h-4 w-4" />
+            <CardTitle className="text-sm text-gray-600 flex items-center gap-2" style={{ fontFamily: 'var(--font-orbitron)' }}>
+              <Users className="h-4 w-4 text-primary" />
               Your Shares
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl" style={{ fontFamily: 'var(--font-orbitron)' }}>
               {getUserTotalShares()}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -246,7 +246,7 @@ export function VaultStats() {
         {Object.entries(tokenStats).map(([token, stats]) => (
           <Card key={token}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm text-gray-600" style={{ fontFamily: 'var(--font-orbitron)' }}>
                 {token} Vault
               </CardTitle>
             </CardHeader>
@@ -257,7 +257,7 @@ export function VaultStats() {
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-gray-500">APY:</span>
-                <span className="text-sm font-medium text-green-600">{stats.apy.toFixed(1)}%</span>
+                <span className="text-sm font-medium text-primary">{stats.apy.toFixed(1)}%</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-gray-500">Your Balance:</span>

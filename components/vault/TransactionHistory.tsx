@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useWallet } from '@/contexts/WalletContext'
-import { apiClient, Transaction } from '@/lib/api-client'
+import apiClient, { Transaction } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -56,37 +56,37 @@ export function TransactionHistory({ limit = 10, showTitle = true }: Transaction
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'SUCCESS':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
+        return <CheckCircle className="h-4 w-4 text-foreground" />
       case 'PENDING':
-        return <Clock className="h-4 w-4 text-yellow-600" />
+        return <Clock className="h-4 w-4 text-muted-foreground" />
       case 'FAILED':
-        return <XCircle className="h-4 w-4 text-red-600" />
+        return <XCircle className="h-4 w-4 text-destructive" />
       default:
-        return <Clock className="h-4 w-4 text-gray-600" />
+        return <Clock className="h-4 w-4 text-muted-foreground" />
     }
   }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'SUCCESS':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Success</Badge>
+        return <Badge variant="secondary" className="bg-secondary text-secondary-foreground">Success</Badge>
       case 'PENDING':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Pending</Badge>
+        return <Badge variant="secondary" className="bg-muted text-muted-foreground">Pending</Badge>
       case 'FAILED':
-        return <Badge variant="secondary" className="bg-red-100 text-red-800">Failed</Badge>
+        return <Badge variant="secondary" className="bg-destructive/10 text-destructive">Failed</Badge>
       default:
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">Unknown</Badge>
+        return <Badge variant="secondary" className="bg-muted text-muted-foreground">Unknown</Badge>
     }
   }
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'DEPOSIT':
-        return <ArrowUpDown className="h-4 w-4 text-green-600" />
+        return <ArrowUpDown className="h-4 w-4 text-foreground" />
       case 'WITHDRAW':
-        return <ArrowDownUp className="h-4 w-4 text-red-600" />
+        return <ArrowDownUp className="h-4 w-4 text-destructive" />
       default:
-        return <History className="h-4 w-4 text-gray-600" />
+        return <History className="h-4 w-4 text-muted-foreground" />
     }
   }
 
@@ -145,9 +145,9 @@ export function TransactionHistory({ limit = 10, showTitle = true }: Transaction
         )}
         <CardContent>
           <div className="text-center py-8">
-            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <p className="text-red-600 mb-2">Error loading transactions</p>
-            <p className="text-sm text-gray-500">{error}</p>
+            <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <p className="text-destructive mb-2">Error loading transactions</p>
+            <p className="text-sm text-muted-foreground">{error}</p>
           </div>
         </CardContent>
       </Card>

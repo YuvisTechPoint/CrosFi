@@ -230,7 +230,7 @@ export class ContractService {
 
   // Strategy functions
   async getStrategyStats(tokenAddress: string) {
-    const [deposits, withdrawals, yield, tvl] = await this.strategyContract.getStrategyStats(tokenAddress)
+    const [deposits, withdrawals, yieldAmount, tvl] = await this.strategyContract.getStrategyStats(tokenAddress)
     
     const tokenInfo = this.getSupportedTokens().find(t => t.address === tokenAddress)
     const decimals = tokenInfo?.decimals || 18
@@ -238,7 +238,7 @@ export class ContractService {
     return {
       deposits: ethers.formatUnits(deposits, decimals),
       withdrawals: ethers.formatUnits(withdrawals, decimals),
-      yield: ethers.formatUnits(yield, decimals),
+      yield: ethers.formatUnits(yieldAmount, decimals),
       tvl: ethers.formatUnits(tvl, decimals)
     }
   }
