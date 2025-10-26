@@ -1,7 +1,7 @@
 "use client"
 
 import { LendingPosition } from "@/lib/types"
-import { CURRENCIES } from "@/lib/mock-data"
+import { CURRENCIES } from "@/lib/currency-config"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { TrendingUp, TrendingDown, Shield, AlertTriangle } from "lucide-react"

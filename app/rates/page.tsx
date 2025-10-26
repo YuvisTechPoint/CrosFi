@@ -1,50 +1,61 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ExchangeRateCard } from "@/components/exchange-rate/ExchangeRateCard"
 import { MentoOracleStatus } from "@/components/exchange-rate/MentoOracleStatus"
-import { EXCHANGE_RATES, CURRENCIES, MOCK_VOLUME_DATA } from "@/lib/mock-data"
+import { CURRENCIES } from "@/lib/currency-config"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TrendingUp, TrendingDown, RefreshCw, BarChart3 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { apiClient } from "@/lib/api-client"
 
 export default function Rates() {
   const [timeframe, setTimeframe] = useState<"24h" | "7d" | "30d">("24h")
-  const [sortBy, setSortBy] = useState<"rate" | "change" | "volume">("change")
+  const [sortBy, setSortBy] = useState<"apy" | "tvl" | "users">("apy")
+  const [vaultTokens, setVaultTokens] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const sortedRates = [...(EXCHANGE_RATES || [])].sort((a, b) => {
+  useEffect(() => {
+    const fetchVaultTokens = async () => {
+      try {
+        const tokens = await apiClient.getVaultTokens()
+        setVaultTokens(tokens)
+      } catch (error) {
+        console.error('Error fetching vault tokens:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchVaultTokens()
+  }, [apiClient])
+
+  const sortedTokens = [...vaultTokens].sort((a, b) => {
     switch (sortBy) {
-      case "rate":
-        return (b.rate || 0) - (a.rate || 0)
-      case "change":
-        return Math.abs(b.change24h || 0) - Math.abs(a.change24h || 0)
-      case "volume":
-        const aVolume = MOCK_VOLUME_DATA.find(v => v.pair === `${a.from}-${a.to}`)?.volume24h || 0
-        const bVolume = MOCK_VOLUME_DATA.find(v => v.pair === `${b.from}-${b.to}`)?.volume24h || 0
-        return bVolume - aVolume
+      case "apy":
+        return b.apy - a.apy
+      case "tvl":
+        return parseFloat(b.totalAssets) - parseFloat(a.totalAssets)
+      case "users":
+        return b.totalUsers - a.totalUsers
       default:
         return 0
     }
   })
 
-  const formatVolume = (volume: number | undefined) => {
-    if (!volume || isNaN(volume)) return '$0'
-    if (volume >= 1000000) {
-      return `$${(volume / 1000000).toFixed(1)}M`
-    } else if (volume >= 1000) {
-      return `$${(volume / 1000).toFixed(0)}K`
+  const formatCurrency = (amount: string | number) => {
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
+    if (numAmount >= 1000000) {
+      return `$${(numAmount / 1000000).toFixed(1)}M`
+    } else if (numAmount >= 1000) {
+      return `$${(numAmount / 1000).toFixed(0)}K`
     }
-    return `$${volume.toFixed(0)}`
-  }
-
-  const getVolumeForPair = (from: string, to: string) => {
-    const volumeData = (MOCK_VOLUME_DATA || []).find(v => v.pair === `${from}-${to}`)
-    return volumeData?.volume24h || 0
+    return `$${numAmount.toFixed(0)}`
   }
 
   return (
@@ -97,9 +108,9 @@ export default function Rates() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="change">Change %</SelectItem>
-                    <SelectItem value="rate">Exchange Rate</SelectItem>
-                    <SelectItem value="volume">Volume</SelectItem>
+                    <SelectItem value="apy">APY</SelectItem>
+                    <SelectItem value="tvl">TVL</SelectItem>
+                    <SelectItem value="users">Users</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -112,70 +123,77 @@ export default function Rates() {
             </div>
           </Card>
 
-          {/* Exchange Rates Grid */}
+          {/* APY Rates Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {sortedRates.map((rate, index) => {
-              const fromInfo = CURRENCIES[rate.from]
-              const toInfo = CURRENCIES[rate.to]
-              const volume = getVolumeForPair(rate.from, rate.to)
-              const isPositive = (rate.change24h || 0) >= 0
-              
-              if (!fromInfo || !toInfo) return null
+            {loading ? (
+              <div className="col-span-full text-center text-muted-foreground py-8">
+                Loading APY rates...
+              </div>
+            ) : sortedTokens.map((token, index) => {
+              const tokenInfo = CURRENCIES[token.token]
+              if (!tokenInfo) return null
               
               return (
-                <ExchangeRateCard
-                  key={index}
-                  fromCurrency={rate.from}
-                  toCurrency={rate.to}
-                  rate={rate.rate || 0}
-                  change24h={rate.change24h || 0}
-                  source="Mento"
-                  lastUpdated={rate.lastUpdated || Date.now()}
-                  showChart={true}
-                  onClick={() => {
-                    // Open detailed chart view
-                    console.log('View chart for', rate.from, 'to', rate.to)
-                  }}
-                />
+                <Card key={index} className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/vault'}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                        style={{ backgroundColor: tokenInfo.color }}
+                      >
+                        {tokenInfo.flag}
+                      </div>
+                      <div>
+                        <div className="font-semibold">{token.token}</div>
+                        <div className="text-sm text-muted-foreground">{tokenInfo.name}</div>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      Live
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">APY</span>
+                      <span className="font-bold text-green-600">{token.apy}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">TVL</span>
+                      <span className="font-medium">{formatCurrency(token.totalAssets)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Users</span>
+                      <span className="font-medium">{token.totalUsers}</span>
+                    </div>
+                  </div>
+                </Card>
               )
             })}
           </div>
 
-          {/* Volume Statistics */}
+          {/* Vault Statistics */}
           <Card className="p-6 mb-8">
-            <h3 className="text-lg font-semibold mb-6">Trading Volume (24h)</h3>
+            <h3 className="text-lg font-semibold mb-6">Vault Statistics</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(MOCK_VOLUME_DATA || []).map((volumeData, index) => {
-                if (!volumeData || !volumeData.pair) return null
-                
-                const [from, to] = volumeData.pair.split('-')
-                const fromInfo = CURRENCIES[from as keyof typeof CURRENCIES]
-                const toInfo = CURRENCIES[to as keyof typeof CURRENCIES]
-                
-                if (!fromInfo || !toInfo) return null
+              {vaultTokens.map((token, index) => {
+                const tokenInfo = CURRENCIES[token.token]
+                if (!tokenInfo) return null
                 
                 return (
                   <div key={index} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div 
                         className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                        style={{ backgroundColor: fromInfo.color }}
+                        style={{ backgroundColor: tokenInfo.color }}
                       >
-                        {fromInfo.flag}
+                        {tokenInfo.flag}
                       </div>
-                      <span className="font-medium">{fromInfo.symbol}</span>
-                      <span className="text-muted-foreground">/</span>
-                      <div 
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                        style={{ backgroundColor: toInfo.color }}
-                      >
-                        {toInfo.flag}
-                      </div>
-                      <span className="font-medium">{toInfo.symbol}</span>
+                      <span className="font-medium">{token.token}</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">{formatVolume(volumeData.volume24h || 0)}</div>
-                      <div className="text-xs text-muted-foreground">24h volume</div>
+                      <div className="font-semibold">{formatCurrency(token.totalAssets)}</div>
+                      <div className="text-xs text-muted-foreground">Total Value Locked</div>
                     </div>
                   </div>
                 )
@@ -183,34 +201,31 @@ export default function Rates() {
             </div>
           </Card>
 
-          {/* Rate Changes Summary */}
+          {/* Top Performers */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Top Gainers (24h)</h3>
+              <h3 className="text-lg font-semibold mb-4">Highest APY</h3>
               <div className="space-y-3">
-                {sortedRates
-                  .filter(rate => (rate.change24h || 0) > 0)
+                {sortedTokens
                   .slice(0, 3)
-                  .map((rate, index) => {
-                    const fromInfo = CURRENCIES[rate.from]
-                    const toInfo = CURRENCIES[rate.to]
-                    
-                    if (!fromInfo || !toInfo) return null
+                  .map((token, index) => {
+                    const tokenInfo = CURRENCIES[token.token]
+                    if (!tokenInfo) return null
                     
                     return (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div 
                             className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                            style={{ backgroundColor: fromInfo.color }}
+                            style={{ backgroundColor: tokenInfo.color }}
                           >
-                            {fromInfo.flag}
+                            {tokenInfo.flag}
                           </div>
-                          <span className="font-medium">{rate.from}/{rate.to}</span>
+                          <span className="font-medium">{token.token}</span>
                         </div>
                         <div className="flex items-center gap-2 text-green-600">
                           <TrendingUp className="w-4 h-4" />
-                          <span className="font-medium">+{(rate.change24h || 0).toFixed(2)}%</span>
+                          <span className="font-medium">{token.apy}%</span>
                         </div>
                       </div>
                     )
@@ -219,31 +234,28 @@ export default function Rates() {
             </Card>
 
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Top Losers (24h)</h3>
+              <h3 className="text-lg font-semibold mb-4">Most Popular</h3>
               <div className="space-y-3">
-                {sortedRates
-                  .filter(rate => (rate.change24h || 0) < 0)
+                {sortedTokens
+                  .sort((a, b) => b.totalUsers - a.totalUsers)
                   .slice(0, 3)
-                  .map((rate, index) => {
-                    const fromInfo = CURRENCIES[rate.from]
-                    const toInfo = CURRENCIES[rate.to]
-                    
-                    if (!fromInfo || !toInfo) return null
+                  .map((token, index) => {
+                    const tokenInfo = CURRENCIES[token.token]
+                    if (!tokenInfo) return null
                     
                     return (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div 
                             className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                            style={{ backgroundColor: fromInfo.color }}
+                            style={{ backgroundColor: tokenInfo.color }}
                           >
-                            {fromInfo.flag}
+                            {tokenInfo.flag}
                           </div>
-                          <span className="font-medium">{rate.from}/{rate.to}</span>
+                          <span className="font-medium">{token.token}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-red-600">
-                          <TrendingDown className="w-4 h-4" />
-                          <span className="font-medium">{(rate.change24h || 0).toFixed(2)}%</span>
+                        <div className="flex items-center gap-2 text-blue-600">
+                          <span className="font-medium">{token.totalUsers} users</span>
                         </div>
                       </div>
                     )
@@ -254,20 +266,22 @@ export default function Rates() {
 
           {/* Information */}
           <Card className="p-6 mt-8">
-            <h3 className="text-lg font-semibold mb-4">About Exchange Rates</h3>
+            <h3 className="text-lg font-semibold mb-4">About APY Rates</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-muted-foreground">
               <div>
-                <h4 className="font-medium text-foreground mb-2">Mento Protocol</h4>
+                <h4 className="font-medium text-foreground mb-2">Mento Integration</h4>
                 <p>
-                  Exchange rates are provided by Mento Protocol, a decentralized stablecoin exchange 
-                  on Celo. Rates are updated in real-time based on market conditions and oracle feeds.
+                  APY rates are generated through integration with the Mento Protocol, 
+                  Celo's native stablecoin exchange mechanism. Yields are calculated 
+                  based on real trading activity and liquidity provision.
                 </p>
               </div>
               <div>
-                <h4 className="font-medium text-foreground mb-2">Rate Updates</h4>
+                <h4 className="font-medium text-foreground mb-2">Yield Generation</h4>
                 <p>
-                  Rates are updated continuously as new transactions occur. The displayed rates 
-                  represent the current market price for exchanging between different Celo stablecoins.
+                  Yields are generated through automated strategies that optimize 
+                  liquidity provision and trading opportunities across the Celo 
+                  ecosystem. Rates are updated in real-time based on performance.
                 </p>
               </div>
             </div>

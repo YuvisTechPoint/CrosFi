@@ -1,7 +1,7 @@
 "use client"
 
 import { LendingPosition } from "@/lib/types"
-import { CURRENCIES, getHealthFactorStatus } from "@/lib/mock-data"
+import { CURRENCIES, getHealthFactorStatus } from "@/lib/currency-config"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

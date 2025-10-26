@@ -1,7 +1,7 @@
 "use client"
 
 import { Currency } from "@/lib/types"
-import { getExchangeRate, CURRENCIES } from "@/lib/mock-data"
+import { getExchangeRate, CURRENCIES } from "@/lib/currency-config"
 import { TrendingUp, TrendingDown, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 

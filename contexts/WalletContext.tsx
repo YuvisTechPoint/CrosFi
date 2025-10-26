@@ -22,17 +22,17 @@ interface WalletProviderProps {
   children: ReactNode
 }
 
-// Celo Alfajores network configuration
-const CELO_ALFAJORES = {
-  chainId: '0xaef3', // 44787 in hex
-  chainName: 'Celo Alfajores Testnet',
+// Local Hardhat network configuration
+const LOCAL_HARDHAT = {
+  chainId: '0x7A69', // 31337 in hex
+  chainName: 'Hardhat Local',
   nativeCurrency: {
     name: 'Celo',
     symbol: 'CELO',
     decimals: 18,
   },
-  rpcUrls: ['https://alfajores-forno.celo-testnet.org'],
-  blockExplorerUrls: ['https://alfajores.celoscan.io'],
+  rpcUrls: ['http://127.0.0.1:8545'],
+  blockExplorerUrls: [''],
 }
 
 export function WalletProvider({ children }: WalletProviderProps) {
@@ -103,7 +103,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
       if (ethereumProvider && 'request' in ethereumProvider) {
         await (ethereumProvider as any).request({
           method: 'wallet_addEthereumChain',
-          params: [CELO_ALFAJORES],
+          params: [LOCAL_HARDHAT],
         })
       }
     } catch (err: any) {
@@ -137,7 +137,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
         
         // Check if we're on the correct network
         const network = await browserProvider.getNetwork()
-        if (network.chainId !== BigInt(44787)) {
+        if (network.chainId !== BigInt(31337)) {
           await switchToCeloNetwork()
         }
       }

@@ -1,15 +1,18 @@
 "use client"
 
 import { Currency } from "@/lib/types"
-import { CURRENCIES, MOCK_BALANCES } from "@/lib/mock-data"
+import { CURRENCIES } from "@/lib/currency-config"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowRightLeft } from "lucide-react"
+import { useWallet } from "@/contexts/WalletContext"
+import { createContractService } from "@/lib/contracts"
+import { useEffect, useState } from "react"
 
 interface MultiCurrencyBalanceProps {
-  balances?: Record<Currency, number>
+  balances?: Record<string, string>
   showConvertedTotal?: boolean
-  baseCurrency?: Currency
+  baseCurrency?: string
   enableQuickSwap?: boolean
   className?: string
 }
@@ -21,29 +24,57 @@ export function MultiCurrencyBalance({
   enableQuickSwap = true,
   className = ''
 }: MultiCurrencyBalanceProps) {
-  const userBalances = balances || MOCK_BALANCES.reduce((acc, balance) => {
-    acc[balance.currency] = balance.balance
-    return acc
-  }, {} as Record<Currency, number>)
+  const { provider, signer, isConnected, address } = useWallet()
+  const [userBalances, setUserBalances] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(true)
 
-  const formatBalance = (amount: number, currency: Currency) => {
+  useEffect(() => {
+    const fetchBalances = async () => {
+      if (!isConnected || !address || !provider || !signer) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const contractService = createContractService(provider, signer)
+        const tokens = contractService.getSupportedTokens()
+        const balancePromises = tokens.map(async (token) => {
+          const balance = await contractService.getTokenBalance(address, token.address)
+          return { token: token.symbol, balance }
+        })
+        
+        const balances = await Promise.all(balancePromises)
+        const balanceMap = balances.reduce((acc, { token, balance }) => {
+          acc[token] = balance
+          return acc
+        }, {} as Record<string, string>)
+        
+        setUserBalances(balanceMap)
+      } catch (error) {
+        console.error('Error fetching balances:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBalances()
+  }, [isConnected, address, provider, signer])
+
+  const displayBalances = balances || userBalances
+
+  const formatBalance = (amount: string | number, currency: string) => {
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
     return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(amount)
+    }).format(numAmount)
   }
 
   const getTotalValue = () => {
-    // Mock conversion rates for total calculation
-    const rates = {
-      cUSD: 1,
-      cEUR: 0.92,
-      cREAL: 5.12,
-      eXOF: 612
-    }
-    
-    return Object.entries(userBalances).reduce((total, [currency, amount]) => {
-      return total + (amount / rates[currency as Currency])
+    // Simplified total calculation - in a real app, you'd use real exchange rates
+    return Object.entries(displayBalances).reduce((total, [currency, amount]) => {
+      const numAmount = parseFloat(amount)
+      return total + numAmount // Simplified: assume 1:1 for now
     }, 0)
   }
 
@@ -60,33 +91,45 @@ export function MultiCurrencyBalance({
       </div>
 
       <div className="space-y-3">
-        {Object.entries(userBalances).map(([currency, amount]) => {
-          const info = CURRENCIES[currency as Currency]
-          return (
-            <div key={currency} className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                  style={{ backgroundColor: info.color }}
-                >
-                  {info.flag}
+        {loading ? (
+          <div className="text-center text-muted-foreground py-4">
+            Loading balances...
+          </div>
+        ) : Object.keys(displayBalances).length === 0 ? (
+          <div className="text-center text-muted-foreground py-4">
+            {!isConnected ? 'Connect your wallet to view balances' : 'No balances found'}
+          </div>
+        ) : (
+          Object.entries(displayBalances).map(([currency, amount]) => {
+            const info = CURRENCIES[currency]
+            if (!info) return null
+            
+            return (
+              <div key={currency} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                    style={{ backgroundColor: info.color }}
+                  >
+                    {info.flag}
+                  </div>
+                  <div>
+                    <div className="font-medium">{info.symbol}</div>
+                    <div className="text-xs text-muted-foreground">{info.name}</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-medium">{info.symbol}</div>
-                  <div className="text-xs text-muted-foreground">{info.name}</div>
+                <div className="text-right">
+                  <div className="font-medium">
+                    {formatBalance(amount, currency)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {currency === baseCurrency ? 'Base' : `≈ ${formatBalance(amount, baseCurrency)} ${baseCurrency}`}
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="font-medium">
-                  {formatBalance(amount, currency as Currency)}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {currency === baseCurrency ? 'Base' : `≈ ${formatBalance(amount / (currency === 'cEUR' ? 0.92 : currency === 'cREAL' ? 5.12 : 612), baseCurrency)} ${baseCurrency}`}
-                </div>
-              </div>
-            </div>
-          )
-        })}
+            )
+          })
+        )}
       </div>
 
       {showConvertedTotal && (

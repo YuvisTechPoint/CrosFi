@@ -17,10 +17,10 @@ library TokenConfig {
         bool isActive; // Whether token is currently supported
     }
 
-    // Celo Alfajores testnet token addresses
-    address public constant CUSD_ADDRESS = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
-    address public constant USDC_ADDRESS = 0x2F25deB3848C207fc8E0c34035B3Ba7fC157602B;
-    address public constant CELO_ADDRESS = address(0); // Native token
+// Local Hardhat testnet token addresses (mock tokens)
+address public constant CUSD_ADDRESS = 0x40a42Baf86Fc821f972Ad2aC878729063CeEF403;
+address public constant USDC_ADDRESS = 0x96F3Ce39Ad2BfDCf92C0F6E2C2CAbF83874660Fc;
+address public constant CELO_ADDRESS = address(0); // Native token
 
     // Token configurations
     function getTokenInfo(address token) internal pure returns (TokenInfo memory) {

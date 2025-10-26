@@ -1,14 +1,23 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { CURRENCY_PAIRS, CURRENCIES } from "@/lib/mock-data"
+import { CURRENCIES } from "@/lib/currency-config"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function CurrencyPairShowcase() {
-  const featuredPairs = CURRENCY_PAIRS.slice(0, 6) // Show first 6 pairs
+  // Create currency pairs from available currencies
+  const currencySymbols = Object.keys(CURRENCIES)
+  const featuredPairs = currencySymbols.slice(0, 3).map((currency, index) => ({
+    collateral: currency,
+    borrow: currencySymbols[(index + 1) % currencySymbols.length],
+    apr: 8.5 + (index * 0.5), // Mock APR for now
+    maxLtv: 75 + (index * 5),
+    liquidity: 50000 + (index * 10000),
+    utilization: 45 + (index * 15)
+  }))
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -171,7 +180,7 @@ export function CurrencyPairShowcase() {
           viewport={{ once: true }}
         >
           <p className="text-muted-foreground mb-4">
-            View all {CURRENCY_PAIRS.length} available currency pairs
+            View all {featuredPairs.length} available currency pairs
           </p>
           <motion.button
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"

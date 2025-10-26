@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Currency } from "@/lib/types"
-import { CURRENCIES, MOCK_BALANCES } from "@/lib/mock-data"
+import { CURRENCIES } from "@/lib/currency-config"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ChevronDown, Check } from "lucide-react"
@@ -20,7 +20,7 @@ interface CurrencySelectorProps {
 export function CurrencySelector({
   selectedCurrency,
   onCurrencySelect,
-  availableCurrencies = ['cUSD', 'cEUR', 'cREAL', 'eXOF'],
+  availableCurrencies = Object.keys(CURRENCIES) as Currency[],
   disabled = false,
   showBalance = true,
   className = ''
@@ -28,8 +28,8 @@ export function CurrencySelector({
   const [isOpen, setIsOpen] = useState(false)
 
   const getBalance = (currency: Currency) => {
-    const balance = MOCK_BALANCES.find(b => b.currency === currency)
-    return balance?.balance || 0
+    // In a real implementation, this would fetch from wallet or API
+    return 0
   }
 
   const selectedInfo = selectedCurrency ? CURRENCIES[selectedCurrency] : null

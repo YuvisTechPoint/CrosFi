@@ -211,5 +211,10 @@ export class APIClient {
 // Create singleton instance
 const apiClient = new APIClient()
 
+// React hook for using the API client
+export function useApiClient() {
+  return apiClient
+}
+
 // Export default instance
 export default apiClient

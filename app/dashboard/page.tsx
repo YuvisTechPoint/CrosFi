@@ -5,16 +5,47 @@ import { Footer } from "@/components/footer"
 import { PositionList } from "@/components/position/PositionList"
 import { MultiCurrencyBalance } from "@/components/currency/MultiCurrencyBalance"
 import { MentoOracleStatus } from "@/components/exchange-rate/MentoOracleStatus"
-import { MOCK_POSITIONS } from "@/lib/mock-data"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Plus, TrendingUp, TrendingDown, DollarSign } from "lucide-react"
 import { InfoTooltip } from "@/components/ui/info-tooltip"
+import { useWallet } from "@/contexts/WalletContext"
+import { apiClient } from "@/lib/api-client"
+import { useEffect, useState } from "react"
 
 export default function Dashboard() {
+  const { address, isConnected } = useWallet()
+  const [positions, setPositions] = useState<any[]>([])
+  const [userStats, setUserStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!isConnected || !address) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const [positionsData, statsData] = await Promise.all([
+          apiClient.getUserPositions(address),
+          apiClient.getUserStats(address)
+        ])
+        setPositions(positionsData)
+        setUserStats(statsData)
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [isConnected, address, apiClient])
+
   const handleCreateNew = () => {
-    // Navigate to lending page
-    window.location.href = '/lend'
+    // Navigate to vault page for yield farming
+    window.location.href = '/vault'
   }
 
   const handleRepay = (position: any) => {
@@ -59,25 +90,12 @@ export default function Dashboard() {
                   <DollarSign className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">$2,340</div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm text-muted-foreground">Total Collateral</span>
-                    <InfoTooltip content="Total value of all your collateral across all currency pairs, converted to USD equivalent." />
+                  <div className="text-2xl font-bold text-foreground">
+                    {loading ? '...' : `$${userStats?.totalDeposited || '0'}`}
                   </div>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">$1,520</div>
                   <div className="flex items-center gap-1">
-                    <span className="text-sm text-muted-foreground">Total Borrowed</span>
-                    <InfoTooltip content="Total amount you have borrowed across all positions, converted to USD equivalent." />
+                    <span className="text-sm text-muted-foreground">Total Deposited</span>
+                    <InfoTooltip content="Total amount you have deposited into the vault across all tokens." />
                   </div>
                 </div>
               </div>
@@ -89,10 +107,29 @@ export default function Dashboard() {
                   <TrendingUp className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">154%</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {loading ? '...' : `$${userStats?.totalEarned || '0'}`}
+                  </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-sm text-muted-foreground">Health Factor</span>
-                    <InfoTooltip content="Overall health factor across all positions. Higher values indicate safer positions." />
+                    <span className="text-sm text-muted-foreground">Total Earned</span>
+                    <InfoTooltip content="Total yield earned from your vault positions." />
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {loading ? '...' : `${userStats?.currentPositions || 0}`}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-muted-foreground">Active Positions</span>
+                    <InfoTooltip content="Number of active vault positions across all tokens." />
                   </div>
                 </div>
               </div>
@@ -104,8 +141,10 @@ export default function Dashboard() {
                   <TrendingDown className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">3</div>
-                  <div className="text-sm text-muted-foreground">Active Positions</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {loading ? '...' : `$${userStats?.totalWithdrawn || '0'}`}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Withdrawn</div>
                 </div>
               </div>
             </Card>
@@ -115,12 +154,13 @@ export default function Dashboard() {
             {/* Main Content */}
             <div className="lg:col-span-2">
               <PositionList
-                positions={MOCK_POSITIONS}
+                positions={positions}
                 onRepay={handleRepay}
                 onAddCollateral={handleAddCollateral}
                 onClose={handleClose}
                 onDetails={handleDetails}
                 onCreateNew={handleCreateNew}
+                loading={loading}
               />
             </div>
 
@@ -141,21 +181,21 @@ export default function Dashboard() {
                     onClick={handleCreateNew}
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Create New Position
+                    Start Yield Farming
                   </Button>
                   <Button 
                     variant="outline" 
                     className="w-full justify-start"
-                    onClick={() => window.location.href = '/markets'}
+                    onClick={() => window.location.href = '/vault'}
                   >
-                    View Markets
+                    View Vault
                   </Button>
                   <Button 
                     variant="outline" 
                     className="w-full justify-start"
                     onClick={() => window.location.href = '/rates'}
                   >
-                    Check Exchange Rates
+                    Check APY Rates
                   </Button>
                 </div>
               </Card>
@@ -164,27 +204,33 @@ export default function Dashboard() {
               <Card className="p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <div className="font-medium">Borrowed 350 cUSD</div>
-                      <div className="text-muted-foreground">2 hours ago</div>
+                  {!isConnected ? (
+                    <div className="text-center text-muted-foreground py-4">
+                      Connect your wallet to view activity
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <div className="font-medium">Added 100 cEUR collateral</div>
-                      <div className="text-muted-foreground">1 day ago</div>
+                  ) : loading ? (
+                    <div className="text-center text-muted-foreground py-4">
+                      Loading activity...
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <div className="font-medium">Created cREAL → cUSD position</div>
-                      <div className="text-muted-foreground">3 days ago</div>
+                  ) : positions.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-4">
+                      No positions yet. Start yield farming!
                     </div>
-                  </div>
+                  ) : (
+                    positions.slice(0, 3).map((position, index) => (
+                      <div key={position.id} className="flex items-center gap-3 text-sm">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="font-medium">
+                            {position.token} Position
+                          </div>
+                          <div className="text-muted-foreground">
+                            {position.shares} shares
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </Card>
             </div>
